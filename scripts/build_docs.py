@@ -129,7 +129,9 @@ def build() -> int:
     if not markdown_files:
         raise SystemExit(f"[build_docs] No markdown files found in: {DOCS_DIR}")
 
-    build_time = datetime.now(timezone.utc).astimezone().strftime("%Y-%m-%d %H:%M:%S %Z")
+    now = datetime.now(timezone.utc).astimezone()
+    build_time = now.strftime("%Y-%m-%d %H:%M:%S %Z")
+    asset_version = now.strftime("%Y%m%d%H%M%S")
 
     built_count = 0
     for md_file in markdown_files:
@@ -151,6 +153,7 @@ def build() -> int:
         text = text.replace("{{CONTENT}}", html_body)
         text = text.replace("{{FOOTER_TEXT}}", escape(config.footer))
         text = text.replace("{{BUILD_TIME}}", escape(build_time))
+        text = text.replace("{{ASSET_VERSION}}", asset_version)
         text = text.replace("{{BASE_URL}}", escape(config.base_url))
         text = text.replace("{{ASSET_PREFIX}}", prefix)
 
