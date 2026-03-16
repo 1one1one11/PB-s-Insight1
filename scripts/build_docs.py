@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import json
+import os
 import re
 import shutil
 import sys
@@ -55,8 +56,14 @@ def load_config() -> SiteConfig:
 
 def clean_dist() -> None:
     if DIST_DIR.exists():
-        shutil.rmtree(DIST_DIR)
+        shutil.rmtree(DIST_DIR, onerror=handle_remove_readonly)
     DIST_DIR.mkdir(parents=True, exist_ok=True)
+
+
+def handle_remove_readonly(func, path, exc_info) -> None:
+    # OneDrive on Windows can mark generated files/directories as read-only.
+    os.chmod(path, 0o700)
+    func(path)
 
 
 def copy_assets() -> None:
