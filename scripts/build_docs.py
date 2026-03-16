@@ -109,6 +109,14 @@ def md_to_html(md_text: str) -> str:
     )
 
 
+def extract_page_title(md_text: str, rel_html: Path) -> str:
+    for line in md_text.splitlines():
+        stripped = line.strip()
+        if stripped.startswith("# "):
+            return stripped[2:].strip()
+    return rel_html.stem.replace("-", " ").title()
+
+
 def output_rel_path(md_file: Path) -> Path:
     rel = md_file.relative_to(DOCS_DIR)
     if rel.name == "index.md" and len(rel.parts) == 1:
@@ -130,7 +138,7 @@ def build() -> int:
         raise SystemExit(f"[build_docs] No markdown files found in: {DOCS_DIR}")
 
     now = datetime.now(timezone.utc).astimezone()
-    build_time = now.strftime("%Y-%m-%d %H:%M:%S %Z")
+    build_time = now.strftime("%Y-%m-%d %H:%M")
     asset_version = now.strftime("%Y%m%d%H%M%S")
 
     built_count = 0
@@ -145,7 +153,7 @@ def build() -> int:
         prefix = asset_prefix(rel_html)
         nav_html = render_navigation(config.navigation, rel_html, prefix)
 
-        title = rel_html.stem.replace("-", " ").title()
+        title = extract_page_title(md_source, rel_html)
         text = template
         text = text.replace("{{PAGE_TITLE}}", escape(title))
         text = text.replace("{{SITE_NAME}}", escape(config.site_name))
